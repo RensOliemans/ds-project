@@ -30,10 +30,25 @@ def parse_subjects(part):
 def tweets_to_dataframe(tweets):
     print(tweets)
 
+def convert_txt_to_csv(filename, base_url='resources'):
+    tweets = get_tweets(f'{base_url}/{filename}')
+    d = {'id': [], 'subjects': [], 'tweets': []}
+    for tweet in tweets:
+        d['id'].append(tweet.id)
+        d['subjects'].append(tweet.subjects)
+        d['tweets'].append(tweet.tweettext)
+
+    df = pd.DataFrame(data=d)
+    stripped_filename = filename.split('.txt')[0]
+    df.to_csv(f'{base_url}/{stripped_filename}.csv')
+
+
 
 def main():
-    tweets = get_tweets('TweetsTrainset.txt')
-    tweets_to_dataframe(tweets)
+    base_url = 'resources'
+    convert_txt_to_csv("TweetsTrainset.txt", base_url)
+    convert_txt_to_csv("TweetsTestset.txt", base_url)
+    convert_txt_to_csv("TweetsTestGroundTruth.txt", base_url)
 
 
 if __name__ == '__main__':

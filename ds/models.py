@@ -1,5 +1,5 @@
 class Tweet:
-    def __init__(self, id, subject, tweettext):
+    def __init__(self, id, subjects, tweettext):
         self.id = id
-        self.subject = subject
+        self.subjects = subjects
         self.tweettext = tweettext
