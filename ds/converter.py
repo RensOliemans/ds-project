@@ -1,6 +1,7 @@
 import pandas as pd
 
 from models import Tweet
+from consts import BASE_URL, FILES
 
 
 def get_tweets(dataset_name):
@@ -29,23 +30,21 @@ def parse_subjects(part):
 
 def convert_txt_to_csv(filename, base_url='resources'):
     tweets = get_tweets(f'{base_url}/{filename}.txt')
-    d = {'id': [], 'subjects': [], 'tweets': []}
+    d = {'id': [], 'subjects': [], 'tweet': []}
     for tweet in tweets:
         d['id'].append(tweet.id)
         d['subjects'].append(tweet.subjects)
-        d['tweets'].append(tweet.tweettext)
+        d['tweet'].append(tweet.tweettext)
 
     df = pd.DataFrame(data=d)
-    df.to_csv(f'{base_url}/{filename}.csv')
+    df.to_csv(f'{base_url}/{filename}.csv', index=False)
 
 
 
-def main():
-    base_url = 'resources'
-    convert_txt_to_csv("TweetsTrainset", base_url)
-    convert_txt_to_csv("TweetsTestset", base_url)
-    convert_txt_to_csv("TweetsTestGroundTruth", base_url)
+def convert_all():
+    for f in FILES.values():
+        convert_txt_to_csv(f, BASE_URL)
 
 
 if __name__ == '__main__':
-    main()
+    convert_all()
