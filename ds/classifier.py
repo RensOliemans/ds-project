@@ -8,6 +8,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn import metrics
 
+import sklearn_crfsuite
+
 import nltk
 from nltk import word_tokenize
 from nltk.stem.wordnet import WordNetLemmatizer
@@ -86,7 +88,7 @@ def get_dtms(X_train, X_test):
 
 
 def predict(X_train_dtm, X_test_dtm, y_train, random_state=42, cls=DecisionTreeClassifier):
-    cl = cls(random_state=random_state)
+    cl = cls()
     print(f"Using classifier: {repr(cl)}")
     cl.fit(X_train_dtm, y_train)
     return cl.predict(X_test_dtm)
@@ -110,7 +112,13 @@ def main():
 
     X_train_dtm, X_test_dtm = get_dtms(X_train, X_test)
 
-    y_test_pred = predict(X_train_dtm, X_test_dtm, y_train)
+    print(X_train_dtm.shape)
+    print(X_test_dtm.shape)
+    print(y_train.shape)
+    print(y_test.shape)
+
+    from sklearn.naive_bayes import MultinomialNB
+    y_test_pred = predict(X_train_dtm, X_test_dtm, y_train, cls=MultinomialNB)
     evaluate(y_test, y_test_pred)
 
 if __name__ == '__main__':
