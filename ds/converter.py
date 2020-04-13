@@ -20,18 +20,15 @@ def get_tweets(dataset_name):
             raise ValueError(f"Error in line {line}")
         yield Tweet(id, subjects, tweettext)
 
+
 def parse_subjects(part):
     subjects = part.split(';')
     subjects = [s for s in subjects if s != '']
-    subjects = [s.split('/')[1] for s in subjects]
 
     return subjects
 
-def tweets_to_dataframe(tweets):
-    print(tweets)
-
 def convert_txt_to_csv(filename, base_url='resources'):
-    tweets = get_tweets(f'{base_url}/{filename}')
+    tweets = get_tweets(f'{base_url}/{filename}.txt')
     d = {'id': [], 'subjects': [], 'tweets': []}
     for tweet in tweets:
         d['id'].append(tweet.id)
@@ -39,16 +36,15 @@ def convert_txt_to_csv(filename, base_url='resources'):
         d['tweets'].append(tweet.tweettext)
 
     df = pd.DataFrame(data=d)
-    stripped_filename = filename.split('.txt')[0]
-    df.to_csv(f'{base_url}/{stripped_filename}.csv')
+    df.to_csv(f'{base_url}/{filename}.csv')
 
 
 
 def main():
     base_url = 'resources'
-    convert_txt_to_csv("TweetsTrainset.txt", base_url)
-    convert_txt_to_csv("TweetsTestset.txt", base_url)
-    convert_txt_to_csv("TweetsTestGroundTruth.txt", base_url)
+    convert_txt_to_csv("TweetsTrainset", base_url)
+    convert_txt_to_csv("TweetsTestset", base_url)
+    convert_txt_to_csv("TweetsTestGroundTruth", base_url)
 
 
 if __name__ == '__main__':
