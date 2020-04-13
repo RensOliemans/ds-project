@@ -1,3 +1,5 @@
+import sys
+
 import pandas as pd
 import consts
 
@@ -11,21 +13,11 @@ class DataReader:
 
     def _setup(self):
         for set, filename in self.files.items():
-            df = pd.read_csv(f'{self.base_url}/{filename}.csv')
+            try:
+                df = pd.read_csv(f'{self.base_url}/{filename}.csv')
+            except FileNotFoundError as e:
+                print(f"Could not find file {e}\n" +
+                      "Call `python converter.py` first")
+                sys.exit(1)
+
             setattr(self, set, df)
-
-
-
-if __name__ == '__main__':
-    d = DataReader()
-    print(d)
-    print(d.train)
-    print(d.test)
-    print(d.ground_truth)
-    x = d.train.tweets
-    y = d.train.subjects
-    id = d.train.id
-
-    print(x.shape)
-    print(y.shape)
-    print(id.shape)

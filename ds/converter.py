@@ -5,8 +5,14 @@ from consts import BASE_URL, FILES
 
 
 def get_tweets(dataset_name):
-    with open(dataset_name) as f:
-        contents = [x.strip() for x in f.readlines()]
+    try:
+        with open(dataset_name) as f:
+            contents = [x.strip() for x in f.readlines()]
+    except FileNotFoundError as e:
+        print(f"Could not find file {e}\n" +
+              "Make sure to add TweetsTrainset.txt, TweetsTestset.txt and " +
+              "TweetsTestGroundTruth.txt")
+        raise
 
     for line in contents:
         parts = line.split('\t')

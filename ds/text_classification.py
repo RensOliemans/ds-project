@@ -21,14 +21,14 @@ class Classification:
         self.evaluate()
 
     def _get_data(self):
-        print("Getting Data")
+        print("Getting Data..")
         d = DataReader()
         self.train = d.train
         self.test = d.test
         self.ground_truth = d.ground_truth
 
     def _preprocess(self):
-        print("Preprocessing")
+        print("Preprocessing..")
         self._set_x()
         # self._set_y()
         self._convert_x()
@@ -51,8 +51,9 @@ class Classification:
         self.x_test = vec.transform(self.x_test)
 
     def _predict(self):
+        print("Predicting..")
         # self._print_shapes()
-        self.cl = MultinomialNB()
+        self.cl = self._get_cl()
         self.cl.fit(self.x_train, self.y_train)
         self.y_test_pred = self.cl.predict(self.x_test)
 
@@ -61,6 +62,11 @@ class Classification:
         print(self.x_test.shape)
         print(self.y_train.shape)
         print(self.y_test.shape)
+
+    def _get_cl(self):
+        from sklearn.multiclass import OneVsRestClassifier
+        from sklearn.svm import LinearSVC
+        return OneVsRestClassifier(LinearSVC())
 
     def evaluate(self):
         if not hasattr(self, 'y_test_pred'):
@@ -74,11 +80,9 @@ class Classification:
                                       average='micro')
         f1 = metrics.f1_score(self.y_test, self.y_test_pred, average='micro')
 
-        print(f"Precision: {precision:.2%}")
-        print(f"Recall: {recall:.2%}")
-        print(f"F1: {f1:.2%}")
-
-
+        print(f"{'Precision:'.ljust(10)} {precision:.2%}")
+        print(f"{'Recall:'.ljust(10)} {recall:.2%}")
+        print(f"{'F1:'.ljust(10)} {f1:.2%}")
 
 
 def main():
