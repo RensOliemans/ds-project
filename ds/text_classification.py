@@ -30,7 +30,7 @@ class Classification:
     def _preprocess(self):
         print("Preprocessing..")
         self._set_x()
-        # self._set_y()
+        self._set_y()
         self._convert_x()
 
     def _set_x(self):
@@ -52,7 +52,7 @@ class Classification:
 
     def _predict(self):
         print("Predicting..")
-        # self._print_shapes()
+        self._print_shapes()
         self.cl = self._get_cl()
         self.cl.fit(self.x_train, self.y_train)
         self.y_test_pred = self.cl.predict(self.x_test)
@@ -63,10 +63,13 @@ class Classification:
         print(self.y_train.shape)
         print(self.y_test.shape)
 
-    def _get_cl(self):
-        from sklearn.multiclass import OneVsRestClassifier
-        from sklearn.svm import LinearSVC
-        return OneVsRestClassifier(LinearSVC())
+    @staticmethod
+    def _get_cl(dummy=False):
+        if dummy:
+            from sklearn.dummy import DummyClassifier
+            return DummyClassifier(strategy='most_frequent')
+        from sklearn.tree import ExtraTreeClassifier
+        return ExtraTreeClassifier()
 
     def evaluate(self):
         if not hasattr(self, 'y_test_pred'):
@@ -88,7 +91,6 @@ class Classification:
 def main():
     c = Classification()
     c.start()
-
 
 
 if __name__ == '__main__':
