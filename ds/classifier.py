@@ -28,9 +28,9 @@ class Tweet:
 
 
 def get_all_tweets():
-    train_set = list(get_tweets("TweetsTrainset.txt"))
-    test_set = list(get_tweets("TweetsTestset.txt"))
-    ground_truth = list(get_tweets("TweetsTestGroundTruth.txt"))
+    train_set = list(get_tweets("resources/TweetsTrainset.txt"))
+    test_set = list(get_tweets("resources/TweetsTestset.txt"))
+    ground_truth = list(get_tweets("resources/TweetsTestGroundTruth.txt"))
     return train_set, test_set, ground_truth
 
 

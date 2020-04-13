@@ -1,59 +1,91 @@
-import nltk
-from nltk.corpus import reuters
-from nltk.corpus import stopwords
+from read_data import DataReader
+from helper import tokenize, stop_words
+
 from sklearn.preprocessing import MultiLabelBinarizer
-
-from nltk import word_tokenize
-from nltk.stem.wordnet import WordNetLemmatizer
-
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.svm import LinearSVC
+from sklearn.naive_bayes import MultinomialNB
 from sklearn import metrics
 
 
+class Classification:
+    def __init__(self):
+        self._setup()
 
-nltk.download('reuters')
-nltk.download('stopwords')
-nltk.download('punkt')
-nltk.download('wordnet')
+    def _setup(self):
+        pass
+
+    def start(self):
+        self._get_data()
+        self._preprocess()
+        self._predict()
+        self.evaluate()
+
+    def _get_data(self):
+        print("Getting Data")
+        d = DataReader()
+        self.train = d.train
+        self.test = d.test
+        self.ground_truth = d.ground_truth
+
+    def _preprocess(self):
+        print("Preprocessing")
+        self._set_x()
+        # self._set_y()
+        self._convert_x()
+
+    def _set_x(self):
+        self.x_train = self.train.tweets
+        self.x_test = self.test.tweets
+
+        self.y_train = self.train.subjects
+        self.y_test = self.ground_truth.subjects
+
+    def _set_y(self):
+        mlb = MultiLabelBinarizer()
+        self.y_train = mlb.fit_transform(self.train.subjects)
+        self.y_test = mlb.transform(self.ground_truth.subjects)
+
+    def _convert_x(self):
+        vec = TfidfVectorizer(stop_words=stop_words, tokenizer=tokenize)
+        self.x_train = vec.fit_transform(self.x_train)
+        self.x_test = vec.transform(self.x_test)
+
+    def _predict(self):
+        # self._print_shapes()
+        self.cl = MultinomialNB()
+        self.cl.fit(self.x_train, self.y_train)
+        self.y_test_pred = self.cl.predict(self.x_test)
+
+    def _print_shapes(self):
+        print(self.x_train.shape)
+        print(self.x_test.shape)
+        print(self.y_train.shape)
+        print(self.y_test.shape)
+
+    def evaluate(self):
+        if not hasattr(self, 'y_test_pred'):
+            print("classification.start() was not run yet, performing now")
+            return self.start()
+
+        print(f"Predicted with classifier {self.cl}")
+        precision = metrics.precision_score(self.y_test, self.y_test_pred,
+                                            average='micro')
+        recall = metrics.recall_score(self.y_test, self.y_test_pred,
+                                      average='micro')
+        f1 = metrics.f1_score(self.y_test, self.y_test_pred, average='micro')
+
+        print(f"Precision: {precision:.2%}")
+        print(f"Recall: {recall:.2%}")
+        print(f"F1: {f1:.2%}")
 
 
-# Get X_train and X_test
-documents = reuters.fileids()
-training_doc_ids = [f_id for f_id in documents if 'training' in f_id]
-test_doc_ids = [f_id for f_id in documents if 'test' in f_id]
-
-X_train = [reuters.raw(d) for d in training_doc_ids]
-X_test = [reuters.raw(d) for d in test_doc_ids]
-
-# Get y_train and y_test
-mlb = MultiLabelBinarizer()
-y_train = mlb.fit_transform([reuters.categories(d)
-                             for d in training_doc_ids])
-y_test = mlb.transform([reuters.categories(d)
-                        for d in test_doc_ids])
-
-# Preprocessing
-def tokenize(text):
-    lemmatizer = WordNetLemmatizer()
-    words = word_tokenize(text)
-    return [lemmatizer.lemmatize(word) for word in words]
-
-stop_words = tokenize(' '.join(stopwords.words("english")))
 
 
-v1 = TfidfVectorizer(stop_words=stop_words, tokenizer=tokenize)
-X_train_dtm = v1.fit_transform(X_train)
-X_test_dtm = v1.transform(X_test)
+def main():
+    c = Classification()
+    c.start()
 
 
-cl = OneVsRestClassifier(LinearSVC(random_state=42))
-cl.fit(X_train_dtm, y_train)
-y_test_pred = cl.predict(X_test_dtm)
 
-# Evaluate
-acc = metrics.accuracy_score(y_test, y_test_pred)
-prec = metrics.precision_score(y_test, y_test_pred, average='micro')
-
-print(f"Precision: {prec:.2%}. Accuracy: {acc:.2%}")
+if __name__ == '__main__':
+    main()

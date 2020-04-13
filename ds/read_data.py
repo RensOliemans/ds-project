@@ -16,11 +16,16 @@ class DataReader:
 
 
 
-
-
 if __name__ == '__main__':
     d = DataReader()
     print(d)
     print(d.train)
     print(d.test)
     print(d.ground_truth)
+    x = d.train.tweets
+    y = d.train.subjects
+    id = d.train.id
+
+    print(x.shape)
+    print(y.shape)
+    print(id.shape)
