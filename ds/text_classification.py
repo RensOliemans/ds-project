@@ -60,8 +60,6 @@ class Classification:
         self.cl = self._get_cl()
         self.cl.fit(self.x_train, self.y_train)
         self.y_test_pred = self.cl.predict(self.x_test)
-        import eli5
-        print(eli5.sklearn.explain_linear_classifier_weights(clf=self.cl, vec=self.vec, top=10))
 
     def _print_shapes(self):
         print(self.x_train.shape)
