@@ -1,6 +1,8 @@
 from read_data import DataReader
 from helper import tokenize, stop_words
+from consts import BASE_URL
 
+import pandas as pd
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
@@ -19,6 +21,7 @@ class Classification:
         self._preprocess()
         self._predict()
         self.evaluate()
+        self._print_x_train()
 
     def _get_data(self):
         print("Getting Data..")
@@ -49,10 +52,10 @@ class Classification:
         vec = TfidfVectorizer(stop_words=stop_words, tokenizer=tokenize)
         self.x_train = vec.fit_transform(self.x_train)
         self.x_test = vec.transform(self.x_test)
+        self.vec = vec
 
     def _predict(self):
         print("Predicting..")
-        self._print_shapes()
         self.cl = self._get_cl()
         self.cl.fit(self.x_train, self.y_train)
         self.y_test_pred = self.cl.predict(self.x_test)
@@ -64,12 +67,12 @@ class Classification:
         print(self.y_test.shape)
 
     @staticmethod
-    def _get_cl(dummy=False):
+    def _get_cl(dummy=False, random_state=42):
         if dummy:
             from sklearn.dummy import DummyClassifier
-            return DummyClassifier(strategy='most_frequent')
-        from sklearn.tree import ExtraTreeClassifier
-        return ExtraTreeClassifier()
+            return DummyClassifier(random_state=random_state, strategy='most_frequent')
+        from sklearn.tree import DecisionTreeClassifier as cls
+        return cls(random_state=random_state)
 
     def evaluate(self):
         if not hasattr(self, 'y_test_pred'):
@@ -86,6 +89,10 @@ class Classification:
         print(f"{'Precision:'.ljust(10)} {precision:.2%}")
         print(f"{'Recall:'.ljust(10)} {recall:.2%}")
         print(f"{'F1:'.ljust(10)} {f1:.2%}")
+
+    def _print_x_train(self):
+        from sklearn.tree.export import export_text
+        print(export_text(self.cl, feature_names=self.vec.get_feature_names()))
 
 
 def main():
