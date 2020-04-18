@@ -21,7 +21,6 @@ class Classification:
         self._preprocess()
         self._predict()
         self.evaluate()
-        self._print_x_train()
 
     def _get_data(self):
         print("Getting Data..")
@@ -71,8 +70,9 @@ class Classification:
         if dummy:
             from sklearn.dummy import DummyClassifier
             return DummyClassifier(random_state=random_state, strategy='most_frequent')
-        from sklearn.tree import DecisionTreeClassifier as cls
-        return cls(random_state=random_state)
+        from sklearn.multiclass import OneVsRestClassifier as cls
+        from sklearn.svm import LinearSVC
+        return cls(LinearSVC(random_state=random_state))
 
     def evaluate(self):
         if not hasattr(self, 'y_test_pred'):
@@ -89,10 +89,6 @@ class Classification:
         print(f"{'Precision:'.ljust(10)} {precision:.2%}")
         print(f"{'Recall:'.ljust(10)} {recall:.2%}")
         print(f"{'F1:'.ljust(10)} {f1:.2%}")
-
-    def _print_x_train(self):
-        from sklearn.tree.export import export_text
-        print(export_text(self.cl, feature_names=self.vec.get_feature_names()))
 
 
 def main():
