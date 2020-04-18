@@ -21,6 +21,7 @@ class Classification:
         self._preprocess()
         self._predict()
         self.evaluate()
+        self._print_results()
 
     def _get_data(self):
         print("Getting Data..")
@@ -32,7 +33,7 @@ class Classification:
     def _preprocess(self):
         print("Preprocessing..")
         self._set_x()
-        self._set_y()
+        # self._set_y()
         self._convert_x()
 
     def _set_x(self):
@@ -44,8 +45,9 @@ class Classification:
 
     def _set_y(self):
         mlb = MultiLabelBinarizer()
-        self.y_train = mlb.fit_transform(self.train.subjects)
-        self.y_test = mlb.transform(self.ground_truth.subjects)
+        self.y_train = mlb.fit_transform([self.train.subjects])
+        self.y_test = mlb.transform([self.ground_truth.subjects])
+        self.mlb = mlb
 
     def _convert_x(self):
         vec = TfidfVectorizer(stop_words=stop_words, tokenizer=tokenize)
@@ -70,9 +72,8 @@ class Classification:
         if dummy:
             from sklearn.dummy import DummyClassifier
             return DummyClassifier(random_state=random_state, strategy='most_frequent')
-        from sklearn.multiclass import OneVsRestClassifier as cls
-        from sklearn.svm import LinearSVC
-        return cls(LinearSVC(random_state=random_state))
+        from sklearn.tree import ExtraTreeClassifier as cls
+        return cls(random_state=random_state)
 
     def evaluate(self):
         if not hasattr(self, 'y_test_pred'):
@@ -89,6 +90,10 @@ class Classification:
         print(f"{'Precision:'.ljust(10)} {precision:.2%}")
         print(f"{'Recall:'.ljust(10)} {recall:.2%}")
         print(f"{'F1:'.ljust(10)} {f1:.2%}")
+
+    def _print_results(self):
+        self._print_shapes()
+        print(pd.DataFrame(self.y_test_pred))
 
 
 def main():
