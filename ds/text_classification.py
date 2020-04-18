@@ -21,7 +21,7 @@ class Classification:
         self._preprocess()
         self._predict()
         self.evaluate()
-        self._print_results()
+        # self._print_results()
 
     def _get_data(self):
         print("Getting Data..")
@@ -60,6 +60,8 @@ class Classification:
         self.cl = self._get_cl()
         self.cl.fit(self.x_train, self.y_train)
         self.y_test_pred = self.cl.predict(self.x_test)
+        import eli5
+        print(eli5.sklearn.explain_linear_classifier_weights(clf=self.cl, vec=self.vec, top=10))
 
     def _print_shapes(self):
         print(self.x_train.shape)
@@ -71,9 +73,10 @@ class Classification:
     def _get_cl(dummy=False, random_state=42):
         if dummy:
             from sklearn.dummy import DummyClassifier
-            return DummyClassifier(random_state=random_state, strategy='most_frequent')
-        from sklearn.tree import ExtraTreeClassifier as cls
-        return cls(random_state=random_state)
+            return DummyClassifier(random_state=random_state, strategy='uniform')
+        from sklearn.multiclass import OneVsRestClassifier as cls
+        from sklearn.svm import LinearSVC
+        return cls(LinearSVC(random_state=random_state))
 
     def evaluate(self):
         if not hasattr(self, 'y_test_pred'):
@@ -93,6 +96,8 @@ class Classification:
 
     def _print_results(self):
         self._print_shapes()
+        df = pd.DataFrame(self.y_test_pred)
+        df.to_csv(BASE_URL + '/predictions')
         print(pd.DataFrame(self.y_test_pred))
 
 
