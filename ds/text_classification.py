@@ -6,6 +6,7 @@ import pandas as pd
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.model_selection import cross_validate
 from sklearn import metrics
 
 
@@ -72,9 +73,8 @@ class Classification:
         if dummy:
             from sklearn.dummy import DummyClassifier
             return DummyClassifier(random_state=random_state, strategy='uniform')
-        from sklearn.multiclass import OneVsRestClassifier as cls
-        from sklearn.svm import LinearSVC
-        return cls(LinearSVC(random_state=random_state))
+        from sklearn.tree import ExtraTreeClassifier as cls
+        return cls(random_state=random_state)
 
     def evaluate(self):
         if not hasattr(self, 'y_test_pred'):
@@ -91,6 +91,10 @@ class Classification:
         print(f"{'Precision:'.ljust(10)} {precision:.2%}")
         print(f"{'Recall:'.ljust(10)} {recall:.2%}")
         print(f"{'F1:'.ljust(10)} {f1:.2%}")
+
+        scoring = ['precision_micro', 'recall_micro', 'f1_micro']
+        scores = cross_validate(self.cl, self.x_test, self.y_test, scoring=scoring)
+        print(f"Scores: {scores}")
 
     def _print_results(self):
         self._print_shapes()
